@@ -5,3 +5,4 @@ Perhaps I should start trying to create small things now. After all, the beginni
 Let the hack begin!!!
 ## Coding Records
  - 9:00 I've done some deep research yesterday, and have a rough idea in my mind. I decide to use google cloud and google gemini to build the demo. Google has everything I need, makes the demo simple enough. As for coding tools, since I'm back in China, using Claude Code has become quite troublesome. I'll just use Cursor for now.
+ - 9:15 I've set up the web framework with cursor, and have it run a self-test. The UI issues are pretty obvious, but at least it's running. Time to go downstairs for a bowl of noodles—I'm starving.
