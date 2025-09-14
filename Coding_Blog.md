@@ -7,3 +7,4 @@ Let the hack begin!!!
  - 9:00 I've done some deep research yesterday, and have a rough idea in my mind. I decide to use google cloud and google gemini to build the demo. Google has everything I need, makes the demo simple enough. As for coding tools, since I'm back in China, using Claude Code has become quite troublesome. I'll just use Cursor for now.
  - 9:15 I've set up the web framework with cursor, and have it run a self-test. The UI issues are pretty obvious, but at least it's running. Time to go downstairs for a bowl of noodles—I'm starving.
  - 10:30 I've spent a lot of time adjusting the UI, and it's just a waste of time. I should test the gemini api instead. Now I need to head out -- I have a lunch appointment with an old friend.
+ - 15:20 Back to work! Let's test the gemini API first.
