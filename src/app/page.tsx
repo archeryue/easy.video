@@ -99,7 +99,6 @@ export default function Home() {
           <div className="h-full flex flex-col">
             <div className="p-6 border-b border-slate-200">
               <h1 className="text-2xl font-bold text-slate-800">Easy Video Canvas</h1>
-              <p className="text-slate-600 mt-1">Your AI-generated content will appear here</p>
             </div>
             <div className="flex-1 p-6">
               <Canvas content={canvasContent} />
