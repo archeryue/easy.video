@@ -194,9 +194,9 @@ export async function generateVideo(prompt: string): Promise<GenerateVideoRespon
     
     // Fallback to sample video in case of error - using shorter videos for better performance
     const sampleVideos = [
-      'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
-      'https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4',
-      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+      'http://localhost:3000/videos/generated_video_1757842104402.mp4',
+      'http://localhost:3000/videos/generated_video_1757842736723.mp4',
+      'http://localhost:3000/videos/generated_video_1757843018326.mp4',
       'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4'
     ]
     
