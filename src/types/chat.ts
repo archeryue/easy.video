@@ -16,10 +16,28 @@ export interface ChatSidebarProps {
   isLoading: boolean
 }
 
+export interface CanvasContent {
+  type: 'image' | 'video'
+  url: string
+  description: string
+  id: string
+  timestamp: Date
+}
+
 export interface CanvasProps {
-  content: {
-    type: 'image' | 'video' | null
-    url: string | null
-    description: string | null
-  }
+  content: CanvasContent[]
+}
+
+export interface GenerateVideoRequest {
+  prompt: string
+  images?: CanvasContent[]
+}
+
+export interface GenerateImageRequest {
+  prompt: string
+}
+
+export interface RequestBody {
+  prompt: string
+  images?: CanvasContent[]
 }

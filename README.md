@@ -7,7 +7,7 @@ A modern web application built with Next.js that allows users to create images a
 - 🎨 **AI Image Generation**: Create stunning images from text descriptions
 - 🎬 **AI Video Generation**: Generate videos from text prompts and images
 - 💬 **Intelligent Chat Interface**: Natural language interaction with AI
-- 🖼️ **Interactive Canvas**: View, download, and manipulate generated content
+- 🖼️ **Multi-Content Canvas**: View multiple images and videos in grid or detail view, with zoom, navigation, and batch download capabilities
 - 🚀 **Cloud Ready**: Optimized for Google Cloud Run deployment
 - 📱 **Responsive Design**: Beautiful UI that works on all devices
 
@@ -70,7 +70,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 2. **Generate Images**: Type descriptions like "Create an image of a sunset over mountains"
 3. **Generate Videos**: Use keywords like "video" or "animation" in your prompts
 4. **View Results**: Generated content appears on the main canvas
-5. **Download Content**: Use the download button to save your creations
+5. **Multi-Content Support**: Generate multiple images and videos - they'll all be saved in the canvas
+6. **Grid View**: When you have multiple items, use the grid view to see all your creations at once
+7. **Detail View**: Click on any item to view it in detail with zoom and navigation controls
+8. **Download Content**: Download individual items or use "Download All" to get everything at once
 
 ### Example Prompts
 

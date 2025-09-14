@@ -3,74 +3,11 @@
 import React, { useState } from 'react'
 import ChatSidebar from '@/components/ChatSidebar'
 import Canvas from '@/components/Canvas'
-import { Message } from '@/types/chat'
+import { Message, CanvasContent, RequestBody } from '@/types/chat'
 import { generateUniqueId } from '@/lib/utils'
-import { analyzePromptIntent } from '@/lib/gemini'
 
-// Function to download video file
-const downloadVideoFile = async (url: string, description: string) => {
-  try {
-    console.log('🔄 Starting video download from URL:', url);
-    
-    let downloadUrl = url;
-    let shouldCleanupUrl = false;
-
-    // Handle different URL types for download
-    if (url.startsWith('blob:')) {
-      // Blob URLs can be used directly
-      console.log('📦 Using blob URL directly');
-      downloadUrl = url;
-    } else if (url.startsWith('http') || url.startsWith('https')) {
-      // External URLs - fetch and create blob
-      console.log('🌐 Fetching external URL for download');
-      const response = await fetch(url, {
-        mode: 'cors',
-        credentials: 'omit'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const blob = await response.blob();
-      console.log('📁 Created blob from response, size:', blob.size, 'bytes');
-      downloadUrl = URL.createObjectURL(blob);
-      shouldCleanupUrl = true;
-    } else if (url.startsWith('data:')) {
-      // Data URLs can be used directly
-      console.log('📊 Using data URL directly');
-      downloadUrl = url;
-    }
-    
-    // Create and trigger download
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    
-    // Generate filename with timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    link.download = `easy-video-${timestamp}.mp4`;
-    
-    // Trigger download
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    console.log('✅ Video download initiated successfully');
-    
-    // Clean up blob URL if we created one
-    if (shouldCleanupUrl) {
-      setTimeout(() => {
-        URL.revokeObjectURL(downloadUrl);
-        console.log('🧹 Cleaned up blob URL');
-      }, 2000);
-    }
-    
-  } catch (error) {
-    console.error('❌ Error downloading video file:', error);
-    // Don't alert here as it might interrupt the user experience
-    console.log('💡 Video download failed, but video should still be viewable in canvas');
-  }
-};
+// Note: Automatic video download functionality has been removed
+// Users can now manually download content using the Canvas download buttons
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
@@ -81,15 +18,7 @@ export default function Home() {
       timestamp: new Date(),
     },
   ])
-  const [canvasContent, setCanvasContent] = useState<{
-    type: 'image' | 'video' | null
-    url: string | null
-    description: string | null
-  }>({
-    type: null,
-    url: null,
-    description: null,
-  })
+  const [canvasContent, setCanvasContent] = useState<CanvasContent[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSendMessage = async (content: string) => {
@@ -104,18 +33,43 @@ export default function Home() {
     setIsLoading(true)
 
     try {
-      // Use Gemini to intelligently analyze the user's prompt and determine intent
-      const contentType = await analyzePromptIntent(content)
-      const isVideo = contentType === 'video'
-      
-      const endpoint = isVideo ? '/api/generate-video' : '/api/generate-image'
-      
-      const response = await fetch(endpoint, {
+      // Use server-side API to analyze the user's prompt and determine intent
+      console.log('🤔 Analyzing user prompt:', content)
+      const intentResponse = await fetch('/api/analyze-intent', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ prompt: content }),
+      })
+      
+      if (!intentResponse.ok) {
+        throw new Error('Failed to analyze intent')
+      }
+      
+      const intentData = await intentResponse.json()
+      const contentType = intentData.intent
+      console.log('✅ Intent analysis result:', contentType)
+      const isVideo = contentType === 'video'
+      
+      const endpoint = isVideo ? '/api/generate-video' : '/api/generate-image'
+      
+      // Prepare request payload
+      const requestBody: RequestBody = { prompt: content }
+      
+      // If it's a video request, include available images for context
+      if (isVideo) {
+        const availableImages = canvasContent.filter(item => item.type === 'image')
+        requestBody.images = availableImages
+        console.log('🖼️ Including', availableImages.length, 'images for video generation context')
+      }
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
       })
 
       if (!response.ok) {
@@ -130,25 +84,28 @@ export default function Home() {
         urlType: data.url ? (data.url.startsWith('blob:') ? 'blob' : data.url.startsWith('http') ? 'http' : 'other') : 'none'
       });
       
-      // Update canvas with generated content
-      setCanvasContent({
+      // Create new canvas content item
+      const newContent: CanvasContent = {
+        id: generateUniqueId(),
         type: isVideo ? 'video' : 'image',
         url: data.url,
         description: content,
-      })
-
-      // Automatically download video file immediately if it's a video
-      if (isVideo && data.url) {
-        console.log('🎬 Video generated, initiating automatic download...');
-        // Start download immediately without delay
-        downloadVideoFile(data.url, content).catch(error => {
-          console.error('❌ Auto-download failed:', error);
-        });
+        timestamp: new Date(),
       }
+      
+      // Add to canvas content array
+      setCanvasContent(prev => [...prev, newContent])
+
+      // Note: Automatic video download has been removed for better user experience
+      // Users can manually download videos using the download button in the canvas
 
       const assistantMessage: Message = {
         id: generateUniqueId(),
-        content: `I've generated a ${isVideo ? 'video' : 'image'} for you: "${content}". You can see it on the canvas!${isVideo ? ' The video file will be automatically downloaded to your computer.' : ''}`,
+        content: `I've generated a ${isVideo ? 'video' : 'image'} for you: "${content}". ${
+          isVideo && data.usedImages > 0 
+            ? `This video was created using context from ${data.usedImages} previously generated image${data.usedImages > 1 ? 's' : ''}. ` 
+            : ''
+        }You can see it on the canvas! Use the download button to save it to your computer.`,
         role: 'assistant',
         timestamp: new Date(),
         generatedContent: {

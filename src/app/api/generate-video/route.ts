@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateVideo, enhancePromptWithGemini } from '@/lib/gemini'
+import { generateVideoWithImages, enhanceVideoPromptWithImages } from '@/lib/gemini'
+import { CanvasContent } from '@/types/chat'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { prompt } = body
+    const { prompt, images } = body
 
     if (!prompt) {
       return NextResponse.json(
@@ -13,17 +14,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Enhance the prompt using Gemini
-    const enhancedPrompt = await enhancePromptWithGemini(prompt, 'video')
+    // Filter for image content only
+    const imageContent: CanvasContent[] = (images || []).filter((item: CanvasContent) => item.type === 'image')
     
-    // Generate the video
-    const result = await generateVideo(enhancedPrompt)
+    // Enhance the prompt using Gemini, incorporating image context if available
+    const enhancedPrompt = await enhanceVideoPromptWithImages(prompt, imageContent)
+    
+    // Generate the video with images
+    const result = await generateVideoWithImages(enhancedPrompt, imageContent)
 
     return NextResponse.json({
       url: result.url,
       description: result.description,
       enhancedPrompt,
-      originalPrompt: prompt
+      originalPrompt: prompt,
+      usedImages: imageContent.length
     })
   } catch (error) {
     console.error('Error in generate-video API:', error)

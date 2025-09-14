@@ -9,4 +9,5 @@ Let the hack begin!!!
  - 10:30 I've spent a lot of time adjusting the UI, and it's just a waste of time. I should test the gemini api instead. Now I need to head out -- I have a lunch appointment with an old friend.
  - 15:20 Back to work! Let's test the gemini API first.
  - 17:55 Finally Finished the gemini API test. Waste a ton of time to test the video api. Add an intention check module before generation. For now, I just download the generated videos into the public/videos dir. I should upload the videos to the OSS I think. But that’s not urgent—I might first make the canvas support multiple images and videos, and then support the prompt for generating videos from multiple images. Acctually I feel hungry now, time to eat.
- - 6:39 Still have not got my meal. Watched a boxing match, Alvarez vs Crawford, which may be the best game of the year. Okay, let's try to coding for a while.
+ - 18:39 Still have not got my meal. Watched a boxing match, Alvarez vs Crawford, which may be the best game of the year. Okay, let's try to coding for a while.
+ - 20:55 It's almost done. But my Veo3 API quota runs out!!! FUCK!!! anyway, I think I've already built a video create agent demo. Next week I'll find a day, to refine the video generation with the images + prompt. That's it, that's all for today.
