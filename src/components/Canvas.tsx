@@ -10,14 +10,55 @@ export default function Canvas({ content }: CanvasProps) {
   const [zoom, setZoom] = useState(1)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (content.url) {
-      const link = document.createElement('a')
-      link.href = content.url
-      link.download = `easy-video-${content.type}-${Date.now()}`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      try {
+        let downloadUrl = content.url
+        let shouldCleanupUrl = false
+
+        // Handle different URL types
+        if (content.url.startsWith('blob:')) {
+          // Blob URLs can be used directly
+          downloadUrl = content.url
+        } else if (content.url.startsWith('http') || content.url.startsWith('https')) {
+          // External URLs - fetch and create blob
+          console.log('Fetching external URL for download:', content.url)
+          const response = await fetch(content.url, {
+            mode: 'cors',
+            credentials: 'omit'
+          })
+          
+          if (!response.ok) {
+            throw new Error(`Failed to fetch: ${response.status}`)
+          }
+          
+          const blob = await response.blob()
+          downloadUrl = URL.createObjectURL(blob)
+          shouldCleanupUrl = true
+        } else if (content.url.startsWith('data:')) {
+          // Data URLs can be used directly
+          downloadUrl = content.url
+        }
+        
+        // Create download link
+        const link = document.createElement('a')
+        link.href = downloadUrl
+        
+        // Set appropriate file extension and name
+        const extension = content.type === 'video' ? 'mp4' : 'png'
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+        link.download = `easy-video-${content.type}-${timestamp}.${extension}`
+        
+        // Clean up blob URL if we created one
+        if (shouldCleanupUrl) {
+          setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000)
+        }
+        
+        console.log('Download initiated successfully')
+      } catch (error) {
+        console.error('Error downloading file:', error)
+        alert(`Failed to download file: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`)
+      }
     }
   }
 
@@ -83,11 +124,37 @@ export default function Canvas({ content }: CanvasProps) {
           />
         ) : content.type === 'video' ? (
           <video
+            key={content.url}
             src={content.url}
             controls
             className={`w-96 h-72 object-contain rounded-lg shadow-lg ${isFullscreen ? '' : 'border border-slate-200'}`}
             autoPlay
             loop
+            muted
+            playsInline
+            preload="metadata"
+            {...(content.url.startsWith('http') && !content.url.includes('localhost') ? { crossOrigin: 'anonymous' } : {})}
+            onError={(e) => {
+              console.error('Video loading error:', e);
+              console.log('Video URL:', content.url);
+              console.log('Video element:', e.currentTarget);
+              console.log('Video element src:', e.currentTarget.src);
+              console.log('Video element readyState:', e.currentTarget.readyState);
+              console.log('Video element networkState:', e.currentTarget.networkState);
+              console.log('Video element error:', e.currentTarget.error);
+            }}
+            onLoadStart={() => {
+              console.log('Video started loading:', content.url);
+            }}
+            onCanPlay={() => {
+              console.log('Video can play:', content.url);
+            }}
+            onLoadedMetadata={() => {
+              console.log('Video metadata loaded:', content.url);
+            }}
+            onLoadedData={() => {
+              console.log('Video data loaded:', content.url);
+            }}
           >
             Your browser does not support the video tag.
           </video>

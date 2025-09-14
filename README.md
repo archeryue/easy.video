@@ -54,6 +54,8 @@ To get your Google Gemini API key:
 2. Create a new API key
 3. Copy the key to your environment file
 
+> **Note**: This application uses Google's Imagen model for image generation through the Gemini API.
+
 ### 4. Run the Development Server
 
 \`\`\`bash
@@ -181,7 +183,7 @@ src/
 
 | Variable | Description | Required |
 |----------|-------------|----------|
-| \`GOOGLE_API_KEY\` | Google Gemini API key | Yes |
+| \`GOOGLE_API_KEY\` | Google Gemini API key for text and image generation | Yes |
 | \`NEXT_PUBLIC_APP_URL\` | Application URL | No |
 
 ## Contributing

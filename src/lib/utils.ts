@@ -26,6 +26,8 @@ export function formatTimestamp(date: Date): string {
   return date.toLocaleDateString()
 }
 
+// Legacy function - now used as fallback in analyzePromptIntent when Gemini API fails
+// For primary routing, use analyzePromptIntent from @/lib/gemini instead
 export function isVideoRequest(prompt: string): boolean {
   const videoKeywords = [
     'video', 'animation', 'movie', 'film', 'animate', 'motion', 'moving',

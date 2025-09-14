@@ -4,7 +4,73 @@ import React, { useState } from 'react'
 import ChatSidebar from '@/components/ChatSidebar'
 import Canvas from '@/components/Canvas'
 import { Message } from '@/types/chat'
-import { isVideoRequest, generateUniqueId } from '@/lib/utils'
+import { generateUniqueId } from '@/lib/utils'
+import { analyzePromptIntent } from '@/lib/gemini'
+
+// Function to download video file
+const downloadVideoFile = async (url: string, description: string) => {
+  try {
+    console.log('🔄 Starting video download from URL:', url);
+    
+    let downloadUrl = url;
+    let shouldCleanupUrl = false;
+
+    // Handle different URL types for download
+    if (url.startsWith('blob:')) {
+      // Blob URLs can be used directly
+      console.log('📦 Using blob URL directly');
+      downloadUrl = url;
+    } else if (url.startsWith('http') || url.startsWith('https')) {
+      // External URLs - fetch and create blob
+      console.log('🌐 Fetching external URL for download');
+      const response = await fetch(url, {
+        mode: 'cors',
+        credentials: 'omit'
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const blob = await response.blob();
+      console.log('📁 Created blob from response, size:', blob.size, 'bytes');
+      downloadUrl = URL.createObjectURL(blob);
+      shouldCleanupUrl = true;
+    } else if (url.startsWith('data:')) {
+      // Data URLs can be used directly
+      console.log('📊 Using data URL directly');
+      downloadUrl = url;
+    }
+    
+    // Create and trigger download
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    link.download = `easy-video-${timestamp}.mp4`;
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log('✅ Video download initiated successfully');
+    
+    // Clean up blob URL if we created one
+    if (shouldCleanupUrl) {
+      setTimeout(() => {
+        URL.revokeObjectURL(downloadUrl);
+        console.log('🧹 Cleaned up blob URL');
+      }, 2000);
+    }
+    
+  } catch (error) {
+    console.error('❌ Error downloading video file:', error);
+    // Don't alert here as it might interrupt the user experience
+    console.log('💡 Video download failed, but video should still be viewable in canvas');
+  }
+};
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
@@ -38,8 +104,9 @@ export default function Home() {
     setIsLoading(true)
 
     try {
-      // Determine if user wants image or video generation
-      const isVideo = isVideoRequest(content)
+      // Use Gemini to intelligently analyze the user's prompt and determine intent
+      const contentType = await analyzePromptIntent(content)
+      const isVideo = contentType === 'video'
       
       const endpoint = isVideo ? '/api/generate-video' : '/api/generate-image'
       
@@ -57,6 +124,12 @@ export default function Home() {
 
       const data = await response.json()
       
+      console.log('📤 API Response received:', { 
+        type: isVideo ? 'video' : 'image', 
+        hasUrl: !!data.url,
+        urlType: data.url ? (data.url.startsWith('blob:') ? 'blob' : data.url.startsWith('http') ? 'http' : 'other') : 'none'
+      });
+      
       // Update canvas with generated content
       setCanvasContent({
         type: isVideo ? 'video' : 'image',
@@ -64,9 +137,18 @@ export default function Home() {
         description: content,
       })
 
+      // Automatically download video file immediately if it's a video
+      if (isVideo && data.url) {
+        console.log('🎬 Video generated, initiating automatic download...');
+        // Start download immediately without delay
+        downloadVideoFile(data.url, content).catch(error => {
+          console.error('❌ Auto-download failed:', error);
+        });
+      }
+
       const assistantMessage: Message = {
         id: generateUniqueId(),
-        content: `I've generated a ${isVideo ? 'video' : 'image'} for you: "${content}". You can see it on the canvas!`,
+        content: `I've generated a ${isVideo ? 'video' : 'image'} for you: "${content}". You can see it on the canvas!${isVideo ? ' The video file will be automatically downloaded to your computer.' : ''}`,
         role: 'assistant',
         timestamp: new Date(),
         generatedContent: {
