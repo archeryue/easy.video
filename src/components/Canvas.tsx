@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { Download, Maximize2, RotateCcw, Image as ImageIcon, Video, Sparkles, ZoomIn, ZoomOut, RotateCw, ChevronLeft, ChevronRight, Grid3X3, Play, Pause } from 'lucide-react'
+import { Download, Maximize2, RotateCcw, Image as ImageIcon, Video, Sparkles, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, Grid3X3, Play } from 'lucide-react'
 import { CanvasProps, CanvasContent } from '@/types/chat'
 
 export default function Canvas({ content }: CanvasProps) {
@@ -121,11 +121,11 @@ export default function Canvas({ content }: CanvasProps) {
 
   // Reset view mode when content changes
   useEffect(() => {
-    if (content.length === 0) {
-      setViewMode('grid')
-      setSelectedIndex(0)
-    } else if (content.length === 1) {
+    if (content.length === 1) {
       setViewMode('detail')
+      setSelectedIndex(0)
+    } else {
+      setViewMode('grid')
       setSelectedIndex(0)
     }
   }, [content.length])

@@ -1,7 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 
 const API_KEY = process.env.GOOGLE_API_KEY || 'mock-api-key-for-testing'
-const IS_MOCK = API_KEY === 'mock-api-key-for-testing'
 
 const genAI = new GoogleGenAI({ apiKey: API_KEY });
 
@@ -23,15 +22,12 @@ export interface GenerateVideoResponse {
 // Core Gemini API function for text generation
 export async function callGeminiTextAPI(prompt: string, model: string = GEMINI_TEXT_MODEL): Promise<string> {
   try {
-    console.log('call text api')
     const result = await genAI.models.generateContent({
       model: model,
       contents: prompt,
     });
-    console.log('call text api done')
     return result.text || prompt
   } catch (error) {
-    console.log('call text api error')
     console.error('Error calling Gemini text API:', error)
     return prompt // Fallback to original prompt
   }
@@ -110,7 +106,7 @@ export async function callGeminiVideoAPI(prompt: string, model: string = GEMINI_
 
     // Return the local video URL and description
     return {
-      url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/videos/${filename}`, // Full URL path
+      url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/videos/${filename}`, // Full URL path
       description: prompt
     };
 
@@ -178,38 +174,6 @@ export async function generateImage(prompt: string): Promise<GenerateImageRespon
   }
 }
 
-export async function generateVideo(prompt: string): Promise<GenerateVideoResponse> {
-  console.log('🎬 Generating video for prompt:', prompt)
-  
-  try {
-    const result = await callGeminiVideoAPI(prompt, GEMINI_VIDEO_MODEL)
-    console.log('✅ Video generation successful:', {
-      hasUrl: !!result.url,
-      urlType: typeof result.url,
-      urlStart: result.url ? result.url.slice(0, 50) + '...' : 'none',
-      isBlobUrl: result.url?.startsWith('blob:'),
-      isHttpUrl: result.url?.startsWith('http')
-    })
-    return result
-  } catch (error) {
-    console.error('❌ Error generating video with Gemini:', error)
-    console.log('🔄 Falling back to sample video...')
-    // Fallback to sample video in case of error - using shorter videos for better performance
-    const sampleVideos = [
-      'http://localhost:3000/videos/generated_video_1757842104402.mp4',
-      'http://localhost:3000/videos/generated_video_1757842736723.mp4',
-      'http://localhost:3000/videos/generated_video_1757843018326.mp4',
-    ]
-
-    const randomVideo = sampleVideos[Math.floor(Math.random() * sampleVideos.length)]
-    console.log('📹 Using fallback video:', randomVideo)
-    
-    return {
-      url: randomVideo,
-      description: `Generated fallback video for: ${prompt}`
-    }
-  }
-}
 
 // Function to analyze user intent and determine if they want image or video generation
 export async function analyzePromptIntent(userPrompt: string): Promise<'image' | 'video'> {
