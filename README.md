@@ -29,25 +29,25 @@ A modern web application built with Next.js that allows users to create images a
 
 ### 1. Clone the Repository
 
-\`\`\`bash
+```bash
 git clone <your-repo-url>
 cd easy.video
-\`\`\`
+```
 
 ### 2. Install Dependencies
 
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 ### 3. Environment Setup
 
 Create a \`.env.local\` file in the root directory:
 
-\`\`\`env
+```bash
 GOOGLE_API_KEY=your_google_gemini_api_key_here
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-\`\`\`
+```
 
 To get your Google Gemini API key:
 1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
@@ -58,9 +58,9 @@ To get your Google Gemini API key:
 
 ### 4. Run the Development Server
 
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
@@ -91,30 +91,30 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 1. Build and Push Docker Image
 
-\`\`\`bash
+```bash
 # Build the Docker image
 docker build -t gcr.io/YOUR_PROJECT_ID/easy-video .
 
 # Push to Google Container Registry
 docker push gcr.io/YOUR_PROJECT_ID/easy-video
-\`\`\`
+```
 
 ### 2. Deploy to Cloud Run
 
-\`\`\`bash
+```bash
 gcloud run deploy easy-video \\
   --image gcr.io/YOUR_PROJECT_ID/easy-video \\
   --platform managed \\
   --region us-central1 \\
   --allow-unauthenticated \\
   --set-env-vars GOOGLE_API_KEY=your_api_key_here
-\`\`\`
+```
 
 ### 3. Using Cloud Build (Recommended)
 
 Create a \`cloudbuild.yaml\` file:
 
-\`\`\`yaml
+```yaml
 steps:
   # Build the container image
   - name: 'gcr.io/cloud-builders/docker'
@@ -141,13 +141,13 @@ steps:
 
 images:
   - 'gcr.io/$PROJECT_ID/easy-video'
-\`\`\`
+```
 
 Deploy using Cloud Build:
 
-\`\`\`bash
+```bash
 gcloud builds submit --config cloudbuild.yaml
-\`\`\`
+```
 
 ## API Endpoints
 
@@ -159,7 +159,7 @@ gcloud builds submit --config cloudbuild.yaml
 
 ### Project Structure
 
-\`\`\`
+```
 src/
 ├── app/
 │   ├── api/           # API routes
@@ -173,7 +173,7 @@ src/
 │   └── gemini.ts      # Gemini AI integration
 └── types/
     └── chat.ts        # TypeScript types
-\`\`\`
+```
 
 ### Available Scripts
 
